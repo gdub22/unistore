@@ -1,0 +1,5 @@
+export { default as Store } from './lib/store'
+export { default as RESTAdapter } from './lib/adapters/rest'
+export { default as FetchAdapter } from './lib/adapters/fetch'
+export { default as XHRAdapter } from './lib/adapters/xhr'
+export { default as HTTPAdapter } from './lib/adapters/http'
