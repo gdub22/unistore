@@ -5,5 +5,12 @@ export default {
   dest: 'dist/unistore.js',
   format: 'umd',
   moduleName: 'Unistore',
-  plugins: [ babel({ presets: [ 'es2015-rollup' ] }) ]
+  plugins: [ 
+    babel({
+      presets: ['es2015-rollup'],
+      plugins: [
+        ['transform-es2015-classes', { loose: true }]
+      ]
+    })
+  ]
 }

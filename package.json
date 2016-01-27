@@ -1,6 +1,6 @@
 {
   "name": "unistore",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "simple isomorphic data fetching store and identity map",
   "author": "Garth Poitras <garth22@gmail.com>",
   "license": "MIT",
