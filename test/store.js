@@ -34,17 +34,15 @@ describe('Store', function () {
 
   it('can register and lookup types', function () {
     const store = new Store()
-    const FooClass = {}
+    const Foo = {}
 
     store.register('person', Person)
-    store.register('foo', FooClass)
-    store.register('bar', null)
-    store.register('baz')
+    store.register('foo', Foo)
+    store.register('bar')
 
     assert.deepEqual(store.lookup('person'), Person)
-    assert.deepEqual(store.lookup('foo'), FooClass)
+    assert.deepEqual(store.lookup('foo'), Foo)
     assert.deepEqual(store.lookup('bar'), {})
-    assert.deepEqual(store.lookup('baz'), {})
   })
 
   it('can update registry', function () {
