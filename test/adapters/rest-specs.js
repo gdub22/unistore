@@ -11,7 +11,7 @@ const remoteData = [
   { id: 4, name: 'Dan' }
 ]
 
-function preloadStore (adapter) {
+function preloadStore (adapter, data) {
   const store = new Store({ adapter })
   store.register('person', {
     endpoints: {
@@ -19,7 +19,7 @@ function preloadStore (adapter) {
       many: 'https://api.example.com/people'
     }
   })
-  store.push('person', preloadData)
+  store.push('person', data || preloadData)
   return store
 }
 
@@ -50,6 +50,14 @@ export default function (adapter, shimResponse, unshimResponse) {
     return store.find('person', 4).then(function (record) {
       assert.deepEqual(record, remoteData[0])
       assert.deepEqual(record, store.get('person', 4))
+    })
+  })
+
+  it('returns an empty array when explictly requesting multiple records but has no results', function () {
+    shimSuccess()
+    const store = preloadStore(adapter, [])
+    return store.find('person').then(function (records) {
+      assert.deepEqual(records, [])
     })
   })
 

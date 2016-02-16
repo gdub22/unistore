@@ -59,6 +59,15 @@ describe('Store', function () {
     assert.deepEqual(store.get('person'), preloadData)
   })
 
+  it('can be cleared of data', function () {
+    const store = preloadStore()
+    store.clear()
+
+    assert.equal(undefined, store.get('person', 1))
+    assert.equal(0, store.get('person').length)
+    assert.notEqual(undefined, store.lookup('person')) // registry still exists
+  })
+
   it('can push records', function () {
     const store = new Store()
     store.register('person')
@@ -77,6 +86,14 @@ describe('Store', function () {
     const store = preloadStore()
     assert.deepEqual(preloadData[0], store.get('person', 1))
     assert.deepEqual(preloadData, store.get('person'))
+  })
+
+  it('returns an empty array when explictly requesting multiple records but has no results', function () {
+    const store = new Store()
+    assert.equal(undefined, store.get('person'))
+    store.register('person')
+    assert.deepEqual([], store.get('person'))
+    assert.deepEqual([], store.get('person', { limit: 10 }))
   })
 
   it('data is not directly mutable', function () {

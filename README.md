@@ -77,6 +77,12 @@ store.push('person', records)
 store.get('person').length // => 3
 ```
 
+### clear
+Clears all data from the local cache
+```js
+store.clear()
+```
+
 ### transform
 Registers a function to transform data before pushing into store.
 
