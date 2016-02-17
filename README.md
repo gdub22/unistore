@@ -10,7 +10,6 @@ http://jsbin.com/wejizi/edit?js,output
 
 ## API
 
-### create
 ```js
 import { Store } from 'unistore'
 let store = new Store()
@@ -21,42 +20,25 @@ Restister a resource type to store:
 ```js
 store.register('person')
 ```
-Here, you also register metadata with the type:
+Here, you'll also typically register any arbitrary metadata you want with the type. `primaryKey` and `endpoints` are internal properties you can define to adapt to your REST service.
 ```js
 store.register('person', {
-  // internal meta
-  primaryKey: 'name', // defaults to 'id'
-  endpoints: {        // for adapter external data fetching
+  primaryKey: 'name', // default: 'id'
+  endpoints: {
     one:  'https://api.example.com/person/:name',
     many: 'https://api.example.com/person/all'
-  },
-
-  // any other custom metadata
-  klass: Person,
-  foo: 'bar'
+  }
 })
 ```
 
-### find / fetch
-`store.find` first looks in the store for cached records, and then if they don't exist, fetches them externally via the adapter and caches them. You can call `fetch` directly if you want to bypass looking for cached records in the store.  Both methods return Promises.
+### lookup
+Returns previously registered metadata for a resource type
 ```js
-store.find('person').then((records) => {
-  // records: Array of all 'person' records
-})
-
-store.find('person', 1).then((record) => {
-  // record: 'person' record with primary key `1`
-})
-
-store.find('person', { limit: 20 }).then((records) => {
-  // records: Array of filtered 'person' records
-})
+store.lookup('person')
 ```
-#### Responses and error handling
-find/fetch Promises are expected to resolve with records.  Therefore, any non successful http status codes will reject the Promise.  Errors will be normalized between the different adapters.
 
 ### get
-Gets cached records directly from the store (without attempting to use adapters).
+Gets cached records directly from the store (without attempting to fetch them externally).
 ```js
 store.get('person', 1) // => 'person' record with primary key `1`
 store.get('person') // => Array of all 'person' records
@@ -83,26 +65,46 @@ Clears all data from the local cache
 store.clear()
 ```
 
-### transform
-Registers a function to transform data before pushing into store.
+### find
+`find` returns a Promise to resolve record(s). It first looks in the store for cached records (`get`), and if they don't exist, fetches them externally via the adapter and caches them. The Promises are expected to resolve with records, therefore, any non-successful http status codes during an adapter fetch will result in a rejected Promise.
 
-For example, if you want to store records as model class instances instead of just raw data. Or if your find many request doesnt directly return an array: 
 ```js
-store.transform(function(data, typeMeta, requestType) {
-  // typeMeta is any metadata added during `store.register`
-  // requestType is a string 'one' or 'many'
-  if (requestType === 'one') {
-    return typeMeta.klass.create(data)
-  } else if (requestType === 'many') {
-    return data.persons
-  }
+store.find('person').then((records) => {
+  // records: Array of all 'person' records
+})
+
+store.find('person', 1).then((record) => {
+  // record: 'person' record with primary key `1`
+})
+
+store.find('person', { limit: 20 }).then((records) => {
+  // records: Array of filtered 'person' records
+})
+```
+**You can call `fetch` directly if you want to bypass first looking for cached records in the store.**
+
+### onTransformOne / onTransformMany
+Register a function to transform data before pushing into the store.  
+```js
+// Example 1: Storing models, instead of raw data in the store
+function Person () { ... }
+store.register('person', { modelClass: Person })
+
+store.onTransformOne(function(type, data) {
+  let Model = store.lookup(type).modelClass
+  return new Model(data)
 })
 
 store.push('person', { id: 1, name: 'John' })
 store.get('person', 1) // => Person instance
+
+// Example 2: Your backend does not directly return an array when fetching many records:
+store.onTransformMany(function(type, data) {
+  return data.people
+})
 ```
 
-### Immutablilty
+## Immutability
 Store data is only mutable by itself internally, or through the `store.push` method.  For example:
 ```js
 let person = store.get('person', 1) // => { id: 1, name: 'John' }

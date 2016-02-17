@@ -17,8 +17,7 @@ function preloadStore (store) {
 function Person (data) {
   return {
     id: 'id_' + data.id,
-    name: data.name.toUpperCase(),
-    employed: data.employed || false
+    name: data.name.toUpperCase()
   }
 }
 
@@ -117,17 +116,11 @@ describe('Store', function () {
     assert.equal('Bob', store.get('person', 1).name)
   })
 
-  it('can transform records before storing', function () {
+  it('can register functions to transform records before storing', function () {
     const store = new Store()
 
-    store.transform(function (record, typeOpts) {
-      if (Array.isArray(record)) {
-        return record.map(function (item) {
-          item.employed = true
-          return item
-        })
-      }
-      return typeOpts(record)
+    store.onTransformOne((type, data) => {
+      return store.lookup(type)(data)
     })
 
     store.register('person', Person)
@@ -139,11 +132,43 @@ describe('Store', function () {
     store.push('person', preloadData)
     assert.equal(3, store.get('person').length)
     assert.equal('JANE', store.get('person', 'id_2').name)
-    assert.equal(true, store.get('person', 'id_1').employed)
+  })
+
+  it('can correctly register one or many transforms', function () {
+    const store = new Store()
+    let count = 0
+
+    store.onTransformOne((type, data) => {
+      count++
+      return data
+    })
+
+    store.onTransformMany((type, data) => {
+      count++
+      return data
+    })
+
+    store.register('person')
+    store.push('person', preloadData)
+    assert.equal(count, 4)
+  })
+
+  it('can manually run transforms without pushing to store', function () {
+    const store = new Store()
+    store.register('person', Person)
+
+    store.onTransformOne((type, data) => {
+      return store.lookup(type)(data)
+    })
+
+    const record = store.transform('person', preloadData[0])
+    assert.equal('JOHN', record.name)
+    assert.equal('id_1', record.id)
+    assert.equal(0, store.get('person').length)
   })
 
   it('throws when calling a non-existant adapter', function () {
-    const store = preloadStore()
+    const store = new Store({ adapter: null })
     return store.find('person', 99999).catch(function (e) {
       assert(true)
     })
