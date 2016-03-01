@@ -64,7 +64,7 @@ export default function (adapter, shimResponse, unshimResponse) {
   it('can get a record and bypass the store', function () {
     shimSuccess()
     const store = preloadStore(adapter)
-    return adapter.get('person', 4).then(function (record) {
+    return adapter.fetch('person', 4).then(function (record) {
       assert.deepEqual(record, remoteData[0])
       assert.equal(undefined, store.get('person', 4))
     })
@@ -73,7 +73,7 @@ export default function (adapter, shimResponse, unshimResponse) {
   describe('Error handling', function () {
     it('reports http error status', function (done) {
       shimResponse({ status: 500 })
-      adapter.get('person').then().catch(function (error) {
+      adapter.fetch('person').then().catch(function (error) {
         assert.equal(error.status, 500)
         done()
       })
@@ -90,7 +90,7 @@ export default function (adapter, shimResponse, unshimResponse) {
 
     it('errors with successful status but bad data', function (done) {
       shimResponse({ status: 200, data: '}{bad' })
-      adapter.get('person').then().catch(function (error) {
+      adapter.fetch('person').then().catch(function (error) {
         assert.ok(error)
         done()
       })

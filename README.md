@@ -81,7 +81,12 @@ store.find('person', { limit: 20 }).then((records) => {
   // records: Array of filtered 'person' records
 })
 ```
-**You can call `fetch` directly if you want to bypass first looking for cached records in the store.**
+**You can call `fetch` directly if you want to bypass first looking for cached records in the store.**  
+
+**find/fetch also take a 3rd param for modifying request options:**
+```js
+store.fetch('person', 5, { method: 'POST' })
+```
 
 ### onTransformOne / onTransformMany
 Register a function to transform data before pushing into the store.  
