@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { Store } from '../dist/unistore'
+import Store from '../dist/unistore'
 
 const preloadData = [
   { id: 1, name: 'John' },
@@ -168,7 +168,7 @@ describe('Store', function () {
   })
 
   it('throws when calling a non-existant adapter', function () {
-    const store = new Store({ adapter: null })
+    const store = new Store({ adapter: function () {} })
     return store.find('person', 99999).catch(function (e) {
       assert(true)
     })
