@@ -1,9 +1,6 @@
 # unistore [![Build Status](https://travis-ci.org/gdub22/unistore.svg)](https://travis-ci.org/gdub22/unistore)
 
-unistore is simple isomorphic data fetching store and identity map.  It allows you to get external data from REST endpoints, and cache the results locally. In the browser, it uses window.fetch (if available) with a fallback to xhr.  In node, the http(s) module.
-
-## Example
-http://jsbin.com/wejizi/edit?js,output
+unistore is simple in-memory data store and identity map.  You can also add adapters to fetch data from an external source.
 
 ## Install
 `npm install unistore`  
@@ -11,7 +8,7 @@ http://jsbin.com/wejizi/edit?js,output
 ## API
 
 ```js
-import { Store } from 'unistore'
+import Store from 'unistore'
 let store = new Store()
 ```
 
@@ -20,14 +17,10 @@ Restister a resource type to store:
 ```js
 store.register('person')
 ```
-Here, you'll also typically register any arbitrary metadata you want with the type. `primaryKey` and `endpoints` are internal properties you can define to adapt to your REST service.
+Here, you'll also typically register any arbitrary metadata you want with the type, e.g. a `primaryKey`
 ```js
 store.register('person', {
   primaryKey: 'name', // default: 'id'
-  endpoints: {
-    one:  'https://api.example.com/person/:name',
-    many: 'https://api.example.com/person/all'
-  }
 })
 ```
 
@@ -38,7 +31,7 @@ store.lookup('person')
 ```
 
 ### get
-Gets cached records directly from the store (without attempting to fetch them externally).
+Gets cached records directly from the store (without attempting to fetch them from an adapter).
 ```js
 store.get('person', 1) // => 'person' record with primary key `1`
 store.get('person') // => Array of all 'person' records
@@ -66,7 +59,7 @@ store.clear()
 ```
 
 ### find
-`find` returns a Promise to resolve record(s). It first looks in the store for cached records (`get`), and if they don't exist, fetches them externally via the adapter and caches them. The Promises are expected to resolve with records, therefore, any non-successful http status codes during an adapter fetch will result in a rejected Promise.
+`find` returns a Promise to resolve record(s). It first looks in the store for cached records (`get`), and if they don't exist, fetches them externally via the adapter and caches them.
 
 ```js
 store.find('person').then((records) => {
